@@ -8,6 +8,5 @@ namespace FindProduct.Services.Warehouses
         string Url { get; set;}
         string QueryParameter { get;set; }
         int DistanceKm{get;set;}
-        Task<ProductSearchResponse> GetProductByName(string productName);
     }
 }

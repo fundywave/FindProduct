@@ -1,9 +1,6 @@
-﻿using System;
-using FindProduct.Services.Interfaces;
+﻿using FindProduct.Services.Interfaces;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using FindProduct.Services.Warehouses;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace FindProduct.Services.Provider

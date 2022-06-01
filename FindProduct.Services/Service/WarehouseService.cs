@@ -10,17 +10,21 @@ namespace FindProduct.Services
 {
     public class WarehouseService : IWarehouseService
     {
-        private readonly IDataProvider<IWarehouse> _dataProvider;
+        private readonly IDataProvider<Warehouse> _dataProvider;
+        private readonly IWarehouseHttpClient<ProductSearchResponse> _warehouseHttpClient;
 
-        public WarehouseService(IDataProvider<IWarehouse> dataProvider)
+
+        public WarehouseService(IDataProvider<Warehouse> dataProvider, IWarehouseHttpClient<ProductSearchResponse> warehouseHttpClient)
         {
             _dataProvider = dataProvider;
+            _warehouseHttpClient = warehouseHttpClient;
+
         }
 
         public async Task<CustomApiResponse<ProductSearchResponse>> FindProduct(string productName)
         {
             var message = string.Empty;
-            var statusCode=HttpStatusCode.OK;
+            var statusCode = HttpStatusCode.OK;
             var productResult = new ProductSearchResponse();
             if (string.IsNullOrEmpty(productName))
             {
@@ -31,10 +35,12 @@ namespace FindProduct.Services
                     Message = "Invalid parameter!"
                 };
             }
+            //list of warehouses
             var warehouses = _dataProvider.Get();
-            foreach (var item in warehouses.OrderBy(x => x.DistanceKm))
+
+            foreach (var warehouse in warehouses.OrderBy(x => x.DistanceKm))
             {
-                productResult =  await Task.Run(()=>item.GetProductByName(productName));
+                productResult = await Task.Run(() => GetProductByName(productName,warehouse.Url,warehouse.QueryParameter));
                 if (productResult?.Product == null)
                 {
                     statusCode = HttpStatusCode.NotFound;
@@ -51,6 +57,11 @@ namespace FindProduct.Services
                 StatusCode = statusCode,
                 Message = message
             };
+        }
+
+        public async Task<ProductSearchResponse> GetProductByName(string productName, string url, string Paramter)
+        {
+            return await _warehouseHttpClient.GetAsync(url, string.Concat(Paramter, productName));
         }
     }
 }
